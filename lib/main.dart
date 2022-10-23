@@ -26,11 +26,16 @@ class TicTac extends StatefulWidget {
 }
 
 class _TicTacState extends State<TicTac> {
-  static  String turn = 'X';
+  static String turn = 'X';
 
   Game game = Game();
-  bool gameover= false;
-
+  bool gameover = false;
+  List<int> scoreboard = [0, 0, 0, 0, 0, 0, 0, 0];
+  //row 1, 2 ,3
+  //column 1, 2, 3
+  //2diagonal
+  int draw = 0;
+  String result = "";
   @override
   void initState() {
     super.initState();
@@ -69,10 +74,21 @@ class _TicTacState extends State<TicTac> {
               crossAxisSpacing: 8.0,
               children: List.generate(Game.boardlength, (index) {
                 return GestureDetector(
-                  onTap: gameover?null:(){
-                    if(game.board![index]=="") {
+                  onTap: gameover
+                      ? null
+                      : () {
+                          if (game.board![index] == "") {
                             setState(() {
                               game.board![index] = turn;
+                              draw++;
+                              gameover =
+                                  game.winnerCheck(turn, index, scoreboard, 3);
+                              if (gameover) {
+                                result = "$turn is the Winner";
+                              } else if (!gameover && draw == 9) {
+                                result = "It's a Draw";
+                                gameover = true;
+                              }
                               if (turn == 'X') {
                                 turn = "O";
                               } else {
@@ -80,8 +96,7 @@ class _TicTacState extends State<TicTac> {
                               }
                             });
                           }
-
-                    },
+                        },
                   child: Container(
                     width: Game.squaresize,
                     height: Game.squaresize,
@@ -90,21 +105,43 @@ class _TicTacState extends State<TicTac> {
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                     child: Center(
-                        child: Text(
-                      game.board![index],
-                      style: TextStyle(
-                          color: game.board![index] == 'X'
-                              ? MainColor.xcolor
-                              : MainColor.ocolor,
-                          fontSize:64.0,)
-                    )),
+                        child: Text(game.board![index],
+                            style: TextStyle(
+                              color: game.board![index] == 'X'
+                                  ? MainColor.xcolor
+                                  : MainColor.ocolor,
+                              fontSize: 64.0,
+                            ))),
                   ),
-                  
                 );
               }),
             ),
           ),
-
+          SizedBox(
+            height: 25.0,
+          ),
+          Text(
+            result,
+            style: TextStyle(color: Colors.white, fontSize: 54),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                game.board = Game.initGameBoard();
+                turn = "X";
+                gameover = false;
+                result = "";
+                draw = 0;
+                scoreboard = [0, 0, 0, 0, 0, 0, 0, 0];
+              });
+            },
+            icon: Icon(
+              Icons.replay,
+              color: Colors.white,
+              size: 20,
+            ),
+            label: Text("Replay"),
+          )
         ],
       ),
     );
